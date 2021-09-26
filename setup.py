@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='easypyxl',
-    version='0.2.1',
+    version='0.2.2',
     descripton='This python package is a wrapper of OpenPyXL for easy usage.',
     url='https://github.com/CauchyComplete/EasyPyXL',
     author='CauchyComplete',

@@ -33,7 +33,6 @@ class Workbook:
                 workbook.save(new_filepath)
         else:
             workbook = openpyxl.Workbook()
-            self.save_excel()
             if verbose:
                 print(f"EasyPyXL created workbook: {excel_filepath}")
             self.empty_file = True
@@ -44,6 +43,7 @@ class Workbook:
         self.verbose = verbose
         self.saved_error_counter = 0
         self.backup = backup
+        self.save_excel()
 
     class Cursor:
         def __init__(self, workbook_class, sheet, start_cell, seq_len, move_vertical):
