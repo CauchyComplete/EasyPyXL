@@ -1,0 +1,11 @@
+.DS_Store
+**/.DS_Store
+data/
+__pycache__/
+.idea/
+.ipynb_checkpoints/
+*.zip
+.vscode/
+*.xlsx
+
+
