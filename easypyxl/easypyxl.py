@@ -33,6 +33,7 @@ class Workbook:
                 workbook.save(new_filepath)
         else:
             workbook = openpyxl.Workbook()
+            self.save_excel()
             if verbose:
                 print(f"EasyPyXL created workbook: {excel_filepath}")
             self.empty_file = True
