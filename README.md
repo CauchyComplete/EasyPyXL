@@ -1,7 +1,21 @@
 # EasyPyXL
  This python package is a wrapper of OpenPyXL for easy usage.
 
+You can easily write your data on an Excel(.xlsx) file.
+
+It is especially helpful when used in loops.
+
+Stop wasting your energy by printing your experiment results to a text file and copy-pasting them to an Excel file one by one. Instead, use this package.
+
+I tried to handle possible errors, but if you face one, please report it to Github Issues.
+
 ## Install
+Install this package:
+
+```pip install easypyxl```
+
+If it does not work, try:
+
 ```pip install git+https://github.com/CauchyComplete/EasyPyXL```
 
 ## Example 1
@@ -38,7 +52,7 @@ for i in range(25):
 ```
 ![ex3](https://github.com/CauchyComplete/EasyPyXL/blob/main/images/ex3.png?raw=true)
 
-## Example 4 : Multiple cursors
+## Example 4 : Multiple cursors, skip_cell()
 ```angular2html
 import easypyxl
 workbook = easypyxl.Workbook("my_excel.xlsx")
@@ -48,6 +62,6 @@ for i in range(100):
     cursor1.write_cell(i)
     cursor2.write_cell(i * 10)
     if i % 5 == 0:
-        cursor1.skip_cell(2)
+        cursor1.skip_cell(2)  # Skip two cells
 ```
 ![ex4](https://github.com/CauchyComplete/EasyPyXL/blob/main/images/ex4.png?raw=true)
