@@ -32,13 +32,14 @@ for i in range(25):
 ```angular2html
 import easypyxl
 workbook = easypyxl.Workbook("my_excel.xlsx", verbose=False)  # Use verbose=False if you want this package to print only important messages. 
-cursor = workbook.new_cursor("MySheet", (2, 2), 4)
-cursor.write_cell(["Method", "TPR", "TNR", "ACC"])  # You can pass list or tuple for multiple writes.
+cursor = workbook.new_cursor("MySheet", "D2", 4)  # You can use "D2" in place of (2, 4)
+cursor.write_cell(["Method", "metric1", "metric2", "metric3"]) # You can pass list or tuple for multiple writes.
+count = 0
 for method in ['A', 'B', 'C', 'D', 'E', 'F']:
     cursor.write_cell(method)
     # Run your code
     for i in range(3):
-        cursor.write_cell(i)
+        cursor.write_cell(count)
 ```
 ![ex2](https://github.com/CauchyComplete/EasyPyXL/blob/main/images/ex2.png?raw=true)
 

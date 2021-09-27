@@ -77,6 +77,8 @@ class Workbook:
             self.item_count += amount
 
     def new_cursor(self, sheetname, start_cell, seq_len, move_vertical=False, overwrite=False):
+        if isinstance(start_cell, str):
+            start_cell = openpyxl.utils.cell.coordinate_to_tuple(start_cell)
         if self.empty_file:
             sheet = self.workbook.active
             sheet.title = sheetname
