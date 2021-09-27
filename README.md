@@ -18,11 +18,11 @@ If it does not work, try:
 
 ```pip install git+https://github.com/CauchyComplete/EasyPyXL```
 
-## Example 1
+## Example 1 : Basics
 ```angular2html
 import easypyxl
 workbook = easypyxl.Workbook("my_excel.xlsx")  # Excel file to write on. If the file does not exist, it will be created.
-cursor = workbook.new_cursor("MySheet", (2, 1), 5)  # New cursor at sheet "MySheet", starting from (2, 1), new line every 5 writes.
+cursor = workbook.new_cursor("MySheet", "B2", 5)  # New cursor at sheet "MySheet", starting from "B2", new line every 5 writes.
 for i in range(25):
     cursor.write_cell(i)
 ```
@@ -32,7 +32,7 @@ for i in range(25):
 ```angular2html
 import easypyxl
 workbook = easypyxl.Workbook("my_excel.xlsx", verbose=False)  # Use verbose=False if you want this package to print only important messages. 
-cursor = workbook.new_cursor("MySheet", "D2", 4)  # You can use "D2" in place of (2, 4)
+cursor = workbook.new_cursor("MySheet", (2, 4), 4)  # You can use (2, 4) in place of "D2".
 cursor.write_cell(["Method", "metric1", "metric2", "metric3"]) # You can pass list or tuple for multiple writes.
 count = 0
 for method in ['A', 'B', 'C', 'D', 'E', 'F']:
@@ -48,7 +48,7 @@ for method in ['A', 'B', 'C', 'D', 'E', 'F']:
 ```angular2html
 import easypyxl
 workbook = easypyxl.Workbook("my_excel.xlsx")
-cursor = workbook.new_cursor("MySheet", (1, 2), 5, move_vertical=True)  # move_vertical: Write top to bottom, then move to the next column.
+cursor = workbook.new_cursor("MySheet", "B1", 5, move_vertical=True)  # move_vertical: Write top to bottom, then move to the next column.
 for i in range(25):
     cursor.write_cell(i)
 ```
@@ -58,8 +58,8 @@ for i in range(25):
 ```angular2html
 import easypyxl
 workbook = easypyxl.Workbook("my_excel.xlsx")
-cursor1 = workbook.new_cursor("Sheet2", (2, 2), 4)
-cursor2 = workbook.new_cursor("Sheet2", (2, 8), 4, move_vertical=True)
+cursor1 = workbook.new_cursor("Sheet2", "B2", 4)
+cursor2 = workbook.new_cursor("Sheet2", "H2", 4, move_vertical=True)
 for i in range(100):
     cursor1.write_cell(i)
     cursor2.write_cell(i * 10)
