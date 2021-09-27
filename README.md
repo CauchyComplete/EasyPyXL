@@ -40,6 +40,7 @@ for method in ['A', 'B', 'C', 'D', 'E', 'F']:
     # Run your code
     for i in range(3):
         cursor.write_cell(count)
+        count += 1
 ```
 ![ex2](https://github.com/CauchyComplete/EasyPyXL/blob/main/images/ex2.png?raw=true)
 
