@@ -22,7 +22,7 @@ If it does not work, try:
 ```angular2html
 import easypyxl
 workbook = easypyxl.Workbook("my_excel.xlsx")  # Excel file to write on. If the file does not exist, it will be created.
-cursor = workbook.new_cursor("MySheet", "B2", 5)  # New cursor at sheet "MySheet", starting from "B2", new line every 5 writes.
+cursor = workbook.new_cursor("MySheet", "A2", 5)  # New cursor at sheet "MySheet", starting from "A2", new line every 5 writes.
 for i in range(25):
     cursor.write_cell(i)
 ```
