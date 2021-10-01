@@ -46,13 +46,14 @@ class Workbook:
         self.save_excel()
 
     class Cursor:
-        def __init__(self, workbook_class, sheet, start_cell, seq_len, move_vertical):
+        def __init__(self, workbook_class, sheet, start_cell, seq_len, move_vertical, reader):
             self.workbook_class = workbook_class
             self.sheet = sheet
             self.start_cell = start_cell
             self.move_vertical = move_vertical
             self.item_count = 0
             self.seq_len = seq_len
+            self.reader = reader
 
         def _write_cell(self, val):
             if self.move_vertical:
@@ -65,6 +66,8 @@ class Workbook:
             self.workbook_class.save_excel()
 
         def write_cell(self, val):
+            if self.reader:
+                raise PermissionError("EasyPyXL: You cannot write_cell() using a cursor with reader=True")
             if isinstance(val, collections.abc.Sequence) and not isinstance(val, str):
                 # list or tuple
                 for v in val:
@@ -73,10 +76,45 @@ class Workbook:
                 # string, int, or float
                 self._write_cell(val)
 
+        def _read_cell(self):
+            if self.move_vertical:
+                val = self.sheet.cell(self.start_cell[0] + (self.item_count % self.seq_len),
+                                      self.start_cell[1] + (self.item_count // self.seq_len)).value
+            else:
+                val = self.sheet.cell(self.start_cell[0] + (self.item_count // self.seq_len),
+                                      self.start_cell[1] + (self.item_count % self.seq_len)).value
+            self.item_count += 1
+            return val
+
+        def read_cell(self, amount=1):
+            if not self.reader:
+                raise PermissionError("EasyPyXL: You cannot read_cell() using a cursor with reader=False")
+            if amount >= 2:
+                result = [self._read_cell() for _ in range(amount)]
+            elif amount <= 0:
+                raise ValueError("EasyPyXL: Cannot read_cell() - amount must be a positive integer.")
+            else:
+                result = self._read_cell()
+            return result
+
+        def read_line(self, amount=1):
+            if not self.reader:
+                raise PermissionError("EasyPyXL: You cannot read_line() using a cursor with reader=False")
+            if amount >= 2:
+                result = [self.read_cell(self.seq_len) for _ in range(amount)]
+            elif amount <= 0:
+                raise ValueError("EasyPyXL: Cannot read_cell() - amount must be a positive integer.")
+            else:
+                result = self.read_cell(self.seq_len)
+            return result
+
         def skip_cell(self, amount=1):
             self.item_count += amount
 
-    def new_cursor(self, sheetname, start_cell, seq_len, move_vertical=False, overwrite=False):
+        def skip_line(self, amount=1):
+            self.item_count += amount * self.seq_len
+
+    def new_cursor(self, sheetname, start_cell, seq_len, move_vertical=False, overwrite=False, reader=False):
         if isinstance(start_cell, str):
             start_cell = openpyxl.utils.cell.coordinate_to_tuple(start_cell)
         if self.empty_file:
@@ -94,10 +132,10 @@ class Workbook:
                 if self.verbose:
                     print(f"EasyPyXL created sheet: {sheetname}")
         prev_cell_value = sheet.cell(*start_cell).value
-        if prev_cell_value is not None and not overwrite:
+        if prev_cell_value is not None and not overwrite and not reader:
             raise ValueError(f"EasyPyXL: start_cell {start_cell} of '{sheetname}' is not empty! "
                              f"Current value: {str(sheet.cell(*start_cell).value)}. To overwrite, set overwrite=True.")
-        cursor = self.Cursor(self, sheet, start_cell, seq_len, move_vertical)
+        cursor = self.Cursor(self, sheet, start_cell, seq_len, move_vertical, reader)
         return cursor
 
     def save_excel(self):

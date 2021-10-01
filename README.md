@@ -67,3 +67,22 @@ for i in range(100):
         cursor1.skip_cell(2)  # Skip two cells
 ```
 ![ex4](https://github.com/CauchyComplete/EasyPyXL/blob/main/images/ex4.png?raw=true)
+
+## Example 5 : read_cell(), read_line()
+```angular2html
+import easypyxl
+workbook = easypyxl.Workbook("my_excel.xlsx", backup=False)
+cursor = workbook.new_cursor("Sheet2", "B3", 4, reader=True)
+print(cursor.read_cell(4))
+print(cursor.read_line())
+print(cursor.read_line(2))
+cursor.skip_line(2)
+print(cursor.read_cell())
+```
+outputs:
+```angular2html
+[2, 3, 4, 5]
+[None, None, 6, 7]
+[[8, 9, 10, None], [None, 11, 12, 13]]
+20
+```
