@@ -120,6 +120,7 @@ class Workbook:
         if self.empty_file:
             sheet = self.workbook.active
             sheet.title = sheetname
+            self.empty_file = False
             if self.verbose:
                 print(f"EasyPyXL created sheet: {sheetname}")
         else:
