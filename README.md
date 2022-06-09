@@ -86,3 +86,13 @@ outputs:
 [[8, 9, 10, None], [None, 11, 12, 13]]
 20
 ```
+
+## Example 6: auto_save=False (manual saving for reducing IO calls)
+```angular2html
+import easypyxl
+workbook = easypyxl.Workbook("my_excel.xlsx")
+cursor = workbook.new_cursor("MySheet", "C2", 4, auto_save=False)  # Use auto_save=False when you don't want to save excel at every write.
+cursor.write_cell(["Method", "metric1", "metric2", "metric3"])
+workbook.save_excel()  # You can manually save the workbook by calling save_excel().
+# When the cursor is destructed (EX: when the process finished), finally the excel file is saved.
+```

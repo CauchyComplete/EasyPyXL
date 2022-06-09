@@ -46,7 +46,7 @@ class Workbook:
         self.save_excel()
 
     class Cursor:
-        def __init__(self, workbook_class, sheet, start_cell, seq_len, move_vertical, reader):
+        def __init__(self, workbook_class, sheet, start_cell, seq_len, move_vertical, reader, auto_save):
             self.workbook_class = workbook_class
             self.sheet = sheet
             self.start_cell = start_cell
@@ -54,6 +54,10 @@ class Workbook:
             self.item_count = 0
             self.seq_len = seq_len
             self.reader = reader
+            self.auto_save = auto_save
+
+        def __del__(self):
+            self.workbook_class.save_excel()
 
         def _write_cell(self, val):
             if self.move_vertical:
@@ -63,7 +67,8 @@ class Workbook:
                 self.sheet.cell(self.start_cell[0] + (self.item_count // self.seq_len),
                                 self.start_cell[1] + (self.item_count % self.seq_len)).value = val
             self.item_count += 1
-            self.workbook_class.save_excel()
+            if self.auto_save:
+                self.workbook_class.save_excel()
 
         def write_cell(self, val):
             if self.reader:
@@ -114,7 +119,7 @@ class Workbook:
         def skip_line(self, amount=1):
             self.item_count += amount * self.seq_len
 
-    def new_cursor(self, sheetname, start_cell, seq_len, move_vertical=False, overwrite=False, reader=False):
+    def new_cursor(self, sheetname, start_cell, seq_len, move_vertical=False, overwrite=False, reader=False, auto_save=True):
         if isinstance(start_cell, str):
             start_cell = openpyxl.utils.cell.coordinate_to_tuple(start_cell)
         if self.empty_file:
@@ -136,7 +141,7 @@ class Workbook:
         if prev_cell_value is not None and not overwrite and not reader:
             raise ValueError(f"EasyPyXL: start_cell {start_cell} of '{sheetname}' is not empty! "
                              f"Current value: {str(sheet.cell(*start_cell).value)}. To overwrite, set overwrite=True.")
-        cursor = self.Cursor(self, sheet, start_cell, seq_len, move_vertical, reader)
+        cursor = self.Cursor(self, sheet, start_cell, seq_len, move_vertical, reader, auto_save)
         return cursor
 
     def save_excel(self):
