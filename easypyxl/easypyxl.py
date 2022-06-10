@@ -6,6 +6,7 @@ corundum240@gmail.com
 import openpyxl
 import os
 import collections.abc
+import time
 
 
 class Workbook:
@@ -43,10 +44,11 @@ class Workbook:
         self.verbose = verbose
         self.saved_error_counter = 0
         self.backup = backup
+        self.prev_saved_time = time.time()
         self.save_excel()
 
     class Cursor:
-        def __init__(self, workbook_class, sheet, start_cell, seq_len, move_vertical, reader, auto_save):
+        def __init__(self, workbook_class, sheet, start_cell, seq_len, move_vertical, reader, auto_save, auto_save_time):
             self.workbook_class = workbook_class
             self.sheet = sheet
             self.start_cell = start_cell
@@ -55,6 +57,7 @@ class Workbook:
             self.seq_len = seq_len
             self.reader = reader
             self.auto_save = auto_save
+            self.auto_save_time = auto_save_time
 
         def __del__(self):
             self.workbook_class.save_excel()
@@ -67,8 +70,6 @@ class Workbook:
                 self.sheet.cell(self.start_cell[0] + (self.item_count // self.seq_len),
                                 self.start_cell[1] + (self.item_count % self.seq_len)).value = val
             self.item_count += 1
-            if self.auto_save:
-                self.workbook_class.save_excel()
 
         def write_cell(self, val):
             if self.reader:
@@ -80,6 +81,9 @@ class Workbook:
             else:
                 # string, int, or float
                 self._write_cell(val)
+
+            if self.auto_save:
+                self.workbook_class.save_excel(self.auto_save_time)
 
         def _read_cell(self):
             if self.move_vertical:
@@ -119,7 +123,9 @@ class Workbook:
         def skip_line(self, amount=1):
             self.item_count += amount * self.seq_len
 
-    def new_cursor(self, sheetname, start_cell, seq_len, move_vertical=False, overwrite=False, reader=False, auto_save=True):
+    def new_cursor(self, sheetname, start_cell, seq_len, move_vertical=False, overwrite=False, reader=False, auto_save=True, auto_save_time=0):
+        if auto_save is False and auto_save_time != 0:
+            raise ValueError("auto_save is False but auto_save_time is given.")
         if isinstance(start_cell, str):
             start_cell = openpyxl.utils.cell.coordinate_to_tuple(start_cell)
         if self.empty_file:
@@ -141,10 +147,16 @@ class Workbook:
         if prev_cell_value is not None and not overwrite and not reader:
             raise ValueError(f"EasyPyXL: start_cell {start_cell} of '{sheetname}' is not empty! "
                              f"Current value: {str(sheet.cell(*start_cell).value)}. To overwrite, set overwrite=True.")
-        cursor = self.Cursor(self, sheet, start_cell, seq_len, move_vertical, reader, auto_save)
+        cursor = self.Cursor(self, sheet, start_cell, seq_len, move_vertical, reader, auto_save, auto_save_time)
         return cursor
 
-    def save_excel(self):
+    def save_excel(self, auto_save_time=0):
+        if auto_save_time == 0:
+            self._save_excel()
+        elif time.time() - self.prev_saved_time > auto_save_time:
+            self._save_excel()
+
+    def _save_excel(self):
         try:
             self.workbook.save(self.excel_filepath)
         except PermissionError:
@@ -162,3 +174,4 @@ class Workbook:
             if self.verbose:
                 print(f"EasyPyXL saved to new file: {self.excel_filepath}")
             self.workbook.save(self.excel_filepath)
+        self.prev_saved_time = time.time()
