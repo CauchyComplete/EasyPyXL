@@ -88,11 +88,19 @@ outputs:
 ```
 
 ## Example 6: auto_save=False (manual saving for reducing IO calls)
+By default, EasyPyXL save the Excel file at every write. If you don't want this behavior, you can disable it by setting auto_save=False.
 ```angular2html
 import easypyxl
 workbook = easypyxl.Workbook("my_excel.xlsx")
-cursor = workbook.new_cursor("MySheet", "C2", 4, auto_save=False)  # Use auto_save=False when you don't want to save excel at every write.
+cursor = workbook.new_cursor("MySheet", "C2", 4, auto_save=False)  # Use auto_save=False when you don't want to save the Excel at every write.
 cursor.write_cell(["Method", "metric1", "metric2", "metric3"])
 workbook.save_excel()  # You can manually save the workbook by calling save_excel().
-# When the cursor is destructed (EX: when the process finished), finally the excel file is saved.
+# When the cursor is destructed (EX: when the process finished), finally the Excel file is saved.
+```
+
+Another option is to use auto_save_time. 
+```angular2html
+import easypyxl
+workbook = easypyxl.Workbook("my_excel.xlsx")  
+cursor = workbook.new_cursor("MySheet", "C2", 4, auto_save=True, auto_save_time=10)  # Save at every write if the time has elapsed more than 10 seconds since the previous write.
 ```
