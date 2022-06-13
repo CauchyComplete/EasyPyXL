@@ -38,6 +38,7 @@ class Workbook:
                 print(f"EasyPyXL created workbook: {excel_filepath}")
             self.empty_file = True
             backup = False
+            self.save_excel()
 
         self.workbook = workbook
         self.excel_filepath = excel_filepath
@@ -45,7 +46,6 @@ class Workbook:
         self.saved_error_counter = 0
         self.backup = backup
         self.prev_saved_time = time.time()
-        self.save_excel()
 
     class Cursor:
         def __init__(self, workbook_class, sheet, start_cell, seq_len, move_vertical, reader, auto_save, auto_save_time):
