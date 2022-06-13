@@ -16,6 +16,7 @@ class Workbook:
         else:
             if os.path.splitext(excel_filepath)[-1] != ".xlsx":
                 raise IOError(f"EasyPyXL only supports '.xlsx' file. Given: {excel_filepath}")
+        need_to_save = False
         if os.path.isfile(excel_filepath):
             workbook = openpyxl.load_workbook(excel_filepath, read_only=False)
             if verbose:
@@ -38,7 +39,7 @@ class Workbook:
                 print(f"EasyPyXL created workbook: {excel_filepath}")
             self.empty_file = True
             backup = False
-            self.save_excel()
+            need_to_save = True
 
         self.workbook = workbook
         self.excel_filepath = excel_filepath
@@ -46,6 +47,8 @@ class Workbook:
         self.saved_error_counter = 0
         self.backup = backup
         self.prev_saved_time = time.time()
+        if need_to_save is True:
+            self.save_excel()
 
     class Cursor:
         def __init__(self, workbook_class, sheet, start_cell, seq_len, move_vertical, reader, auto_save, auto_save_time):
