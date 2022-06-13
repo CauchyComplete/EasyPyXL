@@ -62,10 +62,6 @@ class Workbook:
             self.auto_save = auto_save
             self.auto_save_time = auto_save_time
 
-        def __del__(self):
-            if self.reader is False:
-                self.workbook_class.save_excel()
-
         def _write_cell(self, val):
             if self.move_vertical:
                 self.sheet.cell(self.start_cell[0] + (self.item_count % self.seq_len),
@@ -139,7 +135,12 @@ class Workbook:
             if self.verbose:
                 print(f"EasyPyXL created sheet: {sheetname}")
         else:
-            if sheetname in self.workbook.sheetnames:
+            if sheetname is None:
+                sheet = self.workbook.active
+                sheetname = sheet.title
+                if self.verbose:
+                    print(f"EasyPyXL loaded active sheet: {sheetname}")
+            elif sheetname in self.workbook.sheetnames:
                 sheet = self.workbook[sheetname]
                 if self.verbose:
                     print(f"EasyPyXL loaded sheet: {sheetname}")

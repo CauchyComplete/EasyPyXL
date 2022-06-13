@@ -72,7 +72,8 @@ for i in range(100):
 ```angular2html
 import easypyxl
 workbook = easypyxl.Workbook("my_excel.xlsx", backup=False)
-cursor = workbook.new_cursor("Sheet2", "B3", 4, reader=True)
+cursor = workbook.new_cursor("Sheet2", "B3", 4, reader=True)  # Use reader=True when you want to read instead of write. 
+# cursor = workbook.new_cursor(None, "B3", 4, reader=True)  # Note that you can use sheetname=None to use the active sheet.
 print(cursor.read_cell(4))
 print(cursor.read_line())
 print(cursor.read_line(2))
@@ -94,8 +95,7 @@ import easypyxl
 workbook = easypyxl.Workbook("my_excel.xlsx")
 cursor = workbook.new_cursor("MySheet", "C2", 4, auto_save=False)  # Use auto_save=False when you don't want to save the Excel at every write.
 cursor.write_cell(["Method", "metric1", "metric2", "metric3"])
-workbook.save_excel()  # You can manually save the workbook by calling save_excel().
-# When the cursor is destructed (EX: when the process finished), finally the Excel file is saved.
+workbook.save_excel()  # You should manually save the workbook by calling save_excel().
 ```
 
 Another option is to use auto_save_time. 
@@ -103,4 +103,6 @@ Another option is to use auto_save_time.
 import easypyxl
 workbook = easypyxl.Workbook("my_excel.xlsx")  
 cursor = workbook.new_cursor("MySheet", "C2", 4, auto_save=True, auto_save_time=10)  # Save at every write if the time has elapsed more than 10 seconds since the previous write.
+# run your code
+workbook.save_excel()
 ```
