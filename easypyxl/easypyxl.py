@@ -60,7 +60,8 @@ class Workbook:
             self.auto_save_time = auto_save_time
 
         def __del__(self):
-            self.workbook_class.save_excel()
+            if self.reader is True:
+                self.workbook_class.save_excel()
 
         def _write_cell(self, val):
             if self.move_vertical:
