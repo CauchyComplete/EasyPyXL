@@ -106,3 +106,24 @@ cursor = workbook.new_cursor("MySheet", "C2", 4, auto_save=True, auto_save_time=
 # run your code
 workbook.save_excel()
 ```
+
+## Example 7: SmartCursor (new in version 1.0.0)
+SmartCursor can read or write using row_name and col_name. SmartCursor can read or write both.
+```angular2html
+import easypyxl
+workbook = easypyxl.Workbook("smart_cursor.xlsx")
+cursor = workbook.new_smart_cursor(sheetname="Exp1", start_cell="C2", row_names=["big", "medium", "small"], col_names=["mIoU", "AP", "time"])
+i = 10
+for method in ["big", "small", "medium"]:
+    for metric in ["mIoU", "AP", "time"]:
+        cursor.write_cell(method, metric, i)
+        i += 1
+cursor.write_cell("huge", "AP", 100)
+print(cursor.read_cell("big", "time"))  # 12
+
+cursor2 = workbook.new_smart_cursor(sheetname="Exp1", start_cell="C2")
+print(cursor2.read_cell("big", "time"))  # 12
+print(cursor2.read_cell("huge", "AP"))  # 100
+print(cursor2.read_cell("huge", "mIoU"))  # None
+```
+![ex7](https://github.com/CauchyComplete/EasyPyXL/blob/main/images/ex7.png?raw=true)

@@ -51,7 +51,8 @@ class Workbook:
             self.save_excel()
 
     class Cursor:
-        def __init__(self, workbook_class, sheet, start_cell, seq_len, move_vertical, reader, auto_save, auto_save_time):
+        def __init__(self, workbook_class, sheet, start_cell, seq_len, move_vertical, reader, auto_save,
+                     auto_save_time):
             self.workbook_class = workbook_class
             self.sheet = sheet
             self.start_cell = start_cell
@@ -123,7 +124,8 @@ class Workbook:
         def skip_line(self, amount=1):
             self.item_count += amount * self.seq_len
 
-    def new_cursor(self, sheetname, start_cell, seq_len, move_vertical=False, overwrite=False, reader=False, auto_save=True, auto_save_time=0):
+    def new_cursor(self, sheetname, start_cell, seq_len, move_vertical=False, overwrite=False, reader=False,
+                   auto_save=True, auto_save_time=0):
         if auto_save is False and auto_save_time != 0:
             raise ValueError("auto_save is False but auto_save_time is given.")
         if isinstance(start_cell, str):
@@ -180,3 +182,127 @@ class Workbook:
                 print(f"EasyPyXL saved to new file: {self.excel_filepath}")
             self.workbook.save(self.excel_filepath)
         self.prev_saved_time = time.time()
+
+    class SmartCursor:
+        def __init__(self, workbook_class, sheet, start_cell, row_names, col_names, auto_save, auto_save_time):
+            self.workbook_class = workbook_class
+            self.sheet = sheet
+            self.start_cell = start_cell
+            self.auto_save = auto_save
+            self.auto_save_time = auto_save_time
+
+            # initial row_names check
+            excel_row_names = []
+            i = 1
+            while True:
+                cur_cell_val = self.sheet.cell(self.start_cell[0] + i, self.start_cell[1]).value
+                if cur_cell_val is not None:
+                    excel_row_names.append(str(cur_cell_val))
+                    i += 1
+                else:
+                    break
+            if row_names is None:
+                self.row_names = excel_row_names
+            elif len(excel_row_names) == 0:
+                self.row_names = row_names
+                for i, row_name in enumerate(self.row_names):
+                    self.sheet.cell(self.start_cell[0] + 1 + i, self.start_cell[1]).value = row_name
+            else:
+                if len(row_names) == len(excel_row_names) and all(
+                        [str(x) == str(y) for x, y in zip(row_names, excel_row_names)]):
+                    self.row_names = row_names
+                    for i, row_name in enumerate(self.row_names):
+                        self.sheet.cell(self.start_cell[0] + 1 + i, self.start_cell[1]).value = row_name
+                else:
+                    raise ValueError("`row_names` is given but does not match the values in Excel.")
+            self.row_names = [str(x) for x in self.row_names]
+
+            # initial col_names check
+            excel_col_names = []
+            i = 1
+            while True:
+                cur_cell_val = self.sheet.cell(self.start_cell[0], self.start_cell[1] + i).value
+                if cur_cell_val is not None:
+                    excel_col_names.append(str(cur_cell_val))
+                    i += 1
+                else:
+                    break
+            if col_names is None:
+                self.col_names = excel_col_names
+            elif len(excel_col_names) == 0:
+                self.col_names = col_names
+                for i, col_names in enumerate(self.col_names):
+                    self.sheet.cell(self.start_cell[0], self.start_cell[1] + 1 + i).value = col_names
+            else:
+                if len(col_names) == len(excel_col_names) and all(
+                        [str(x) == str(y) for x, y in zip(col_names, excel_col_names)]):
+                    self.col_names = col_names
+                    for i, col_names in enumerate(self.col_names):
+                        self.sheet.cell(self.start_cell[0], self.start_cell[1] + 1 + i).value = col_names
+                else:
+                    raise ValueError("`col_names` is given but does not match the values in Excel.")
+            self.col_names = [str(x) for x in self.col_names]
+
+        def _write_cell(self, row_num, col_num, val):
+            self.sheet.cell(row_num, col_num).value = val
+
+        def write_cell(self, row_name, col_name, val):
+            if row_name not in self.row_names:
+                self.row_names.append(str(row_name))
+                self._write_cell(self.start_cell[0] + len(self.row_names), self.start_cell[1], row_name)
+            if col_name not in self.col_names:
+                self.col_names.append(str(col_name))
+                self._write_cell(self.start_cell[0], self.start_cell[1] + len(self.col_names), col_name)
+            row_num = self.start_cell[0] + 1 + self.row_names.index(str(row_name))
+            col_num = self.start_cell[1] + 1 + self.col_names.index(str(col_name))
+            self._write_cell(row_num, col_num, val)
+
+            if self.auto_save:
+                self.workbook_class.save_excel(self.auto_save_time)
+
+        def _read_cell(self, row_num, col_num):
+            return self.sheet.cell(row_num, col_num).value
+
+        def read_cell(self, row_name, col_name):
+            if row_name not in self.row_names or col_name not in self.col_names:
+                return None
+            row_num = self.start_cell[0] + 1 + self.row_names.index(str(row_name))
+            col_num = self.start_cell[1] + 1 + self.col_names.index(str(col_name))
+            return self._read_cell(row_num, col_num)
+
+    def new_smart_cursor(self, sheetname, start_cell, row_names=None, col_names=None, auto_save=True, auto_save_time=0):
+        if auto_save is False and auto_save_time != 0:
+            raise ValueError("auto_save is False but auto_save_time is given.")
+        if row_names:
+            assert isinstance(row_names, list)
+            if not len(row_names) == len(set(row_names)):
+                raise ValueError("row_names must not have duplicate elements")
+        if col_names:
+            assert isinstance(col_names, list)
+            if not len(col_names) == len(set(col_names)):
+                raise ValueError("row_names must not have duplicate elements")
+        if isinstance(start_cell, str):
+            start_cell = openpyxl.utils.cell.coordinate_to_tuple(start_cell)
+        if self.empty_file:
+            sheet = self.workbook.active
+            sheet.title = sheetname
+            self.empty_file = False
+            if self.verbose:
+                print(f"EasyPyXL created sheet: {sheetname}")
+        else:
+            if sheetname is None:
+                sheet = self.workbook.active
+                sheetname = sheet.title
+                if self.verbose:
+                    print(f"EasyPyXL loaded active sheet: {sheetname}")
+            elif sheetname in self.workbook.sheetnames:
+                sheet = self.workbook[sheetname]
+                if self.verbose:
+                    print(f"EasyPyXL loaded sheet: {sheetname}")
+            else:
+                sheet = self.workbook.create_sheet(sheetname)
+                if self.verbose:
+                    print(f"EasyPyXL created sheet: {sheetname}")
+        # prev_cell_value = sheet.cell(*start_cell).value
+        smart_cursor = self.SmartCursor(self, sheet, start_cell, row_names, col_names, auto_save, auto_save_time)
+        return smart_cursor
