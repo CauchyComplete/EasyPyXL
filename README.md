@@ -127,3 +127,17 @@ print(cursor2.read_cell("huge", "AP"))  # 100
 print(cursor2.read_cell("huge", "mIoU"))  # None
 ```
 ![ex7](https://github.com/CauchyComplete/EasyPyXL/blob/main/images/ex7.png?raw=true)
+
+## Example 8: SmartCursor 2
+```angular2html
+import easypyxl
+workbook = easypyxl.Workbook("smart_cursor2.xlsx")
+cursor = workbook.new_smart_cursor(sheetname="Exp2", start_cell="B2", corner_name="number of params")
+cursor.write_cell("100", "SSIM", 10.5)
+cursor.write_cell("1k", "SSIM", 12.5)
+cursor.write_cell("1k", "cost", 100)
+cursor.write_cell("1M", "cost", 4000)
+```
+![ex7](https://github.com/CauchyComplete/EasyPyXL/blob/main/images/ex8.png?raw=true)
+
+

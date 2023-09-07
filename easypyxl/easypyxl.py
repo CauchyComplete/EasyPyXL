@@ -184,12 +184,20 @@ class Workbook:
         self.prev_saved_time = time.time()
 
     class SmartCursor:
-        def __init__(self, workbook_class, sheet, start_cell, row_names, col_names, auto_save, auto_save_time):
+        def __init__(self, workbook_class, sheet, start_cell, row_names, col_names, corner_name, auto_save, auto_save_time):
             self.workbook_class = workbook_class
             self.sheet = sheet
             self.start_cell = start_cell
             self.auto_save = auto_save
             self.auto_save_time = auto_save_time
+
+            # Check corner_name
+            if corner_name is not None:
+                if sheet.cell(*start_cell).value is not None:
+                    if not str(sheet.cell(*start_cell).value) == str(corner_name):
+                        raise ValueError(f"corner_name is given ({corner_name}) but not equal to the value in Excel ({sheet.cell(*start_cell).value}).")
+                sheet.cell(*start_cell).value = str(corner_name)
+
 
             # initial row_names check
             excel_row_names = []
@@ -270,7 +278,7 @@ class Workbook:
             col_num = self.start_cell[1] + 1 + self.col_names.index(str(col_name))
             return self._read_cell(row_num, col_num)
 
-    def new_smart_cursor(self, sheetname, start_cell, row_names=None, col_names=None, auto_save=True, auto_save_time=0):
+    def new_smart_cursor(self, sheetname, start_cell, row_names=None, col_names=None, corner_name=None, auto_save=True, auto_save_time=0):
         if auto_save is False and auto_save_time != 0:
             raise ValueError("auto_save is False but auto_save_time is given.")
         if row_names:
@@ -303,6 +311,5 @@ class Workbook:
                 sheet = self.workbook.create_sheet(sheetname)
                 if self.verbose:
                     print(f"EasyPyXL created sheet: {sheetname}")
-        # prev_cell_value = sheet.cell(*start_cell).value
-        smart_cursor = self.SmartCursor(self, sheet, start_cell, row_names, col_names, auto_save, auto_save_time)
+        smart_cursor = self.SmartCursor(self, sheet, start_cell, row_names, col_names, corner_name, auto_save, auto_save_time)
         return smart_cursor
